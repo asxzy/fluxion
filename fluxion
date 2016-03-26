@@ -715,7 +715,32 @@ function setinterface {
 		
 		WIFIMONITOR=$(./airmon start $PREWIFI | grep "enabled on" | cut -d " " -f 5 | cut -d ")" -f 1)
 		WIFI_MONITOR=$WIFIMONITOR
-		WIFI=$PREWIFI
+        if [ "$INTERFACESNUMBER" -gt "1" ]; then
+            echo "There is a second wireless interface, do you want to use it to host AP? \n 1=y/else=n"
+            read yn
+            case $yn in
+                1 ) 
+                    echo "Select an interface for hostapd"
+                    echo
+                    i=0
+                    
+                    for line in "${wirelessifaces[@]}"; do
+                        i=$(($i+1))
+                        wirelessifaces[$i]=$line
+                        echo -e "$blue ""$i)"$transparent" $line"
+                    done
+                    
+                    echo -n "#? "
+                    read line
+                    PREWIFI2=$(echo ${wirelessifaces[$line]} | awk '{print $1}')
+                    WIFI=$PREWIFI2
+                    break ;;
+                * ) WIFI=$PREWIFI ;;
+            esac
+
+        fi
+		echo "DEBUG: \$WIFI\="$WIFI
+        sleep 5
 		
 		#No wireless cards
 	else
